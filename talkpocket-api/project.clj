@@ -16,8 +16,11 @@
                  [org.slf4j/jul-to-slf4j "1.7.21"]
                  [org.slf4j/jcl-over-slf4j "1.7.21"]
                  [org.slf4j/log4j-over-slf4j "1.7.21"]
-
-                 [diffbot/diffbot "0.1.0"]]
+                 [diffbot/diffbot "0.1.0"]
+                 [org.clojure/core.async "0.2.391"]
+                 [com.ibm.watson.developer_cloud/java-sdk "3.4.0"]
+                 [environ "1.1.0"]
+                 [org.slf4j/log4j-over-slf4j "1.7.21"]]
   :min-lein-version "2.0.0"
   :resource-paths ["config", "resources"]
   ;; If you use HTTP/2 or ALPN, use the java-agent to pull in the correct alpn-boot dependency
