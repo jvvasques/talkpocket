@@ -1,0 +1,6 @@
+version: "2"
+services:
+  talkforce-db:
+    image: cassandra:2.2
+    ports:
+      - "9042:9042"
