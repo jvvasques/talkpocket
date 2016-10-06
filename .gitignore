@@ -153,3 +153,7 @@ flycheck_*.el
 
 # projectiles files
 .projectile
+
+# IntelliJ IDEA
+.idea/
+*.iml
