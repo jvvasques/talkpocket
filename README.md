@@ -1,13 +1,15 @@
-# Idea:
+# TalkPocket
+
+## Idea:
 
 * Access Pocket feed from user
 * Retrieve text from pocketed articles
 * Apply text to speech to said articles using Watson text to speech API
 * Clean and save URL entry to Cassandra and associate it with an ID
-* Save MP3 file in Minio and associate it with the RethinkDB ID
+* Save MP3 file in Minio and associate it with the ID saved in Cassandra 
 * Download audio file when Entry ID is requested
 
-# Tools used:
+## Tools used:
 
 * Clojure:
   * Pedestal
@@ -28,9 +30,10 @@
     * https://github.com/minio/minio-java
     * https://github.com/minio/minio-java-rest-example
 
-# Possible Architecture:
+## Possible Architecture:
 
-Create Speech Articles:
+### Create Speech Articles:
+![alt tag](https://raw.githubusercontent.com/filipecabaco/talkpocket/img/create.png)
 
 1. Send API key to fetch articles
    * Request articles and fetch them from service, returns text ready to be converted
@@ -41,7 +44,8 @@ Create Speech Articles:
 4. Persist file using File ID
    * Save the MP3 file into File Storage with the File ID
 
-Fetch Speech Article
+### Fetch Speech Article
+![alt tag](https://raw.githubusercontent.com/filipecabaco/talkpocket/img/fetch.png)
 
 1. Send ID of article
    * Fetch entry by ID and respective File ID
@@ -49,7 +53,7 @@ Fetch Speech Article
    * Fetch file by File ID
 3. Make file available for download
 
-Nice to have:
+## Nice to have:
 * Websocket endpoint provided
 * Simple clojurescript implementation of a Web Listener
 * React-native application based on Web Listener
