@@ -33,7 +33,7 @@
 ## Possible Architecture:
 
 ### Create Speech Articles:
-![alt tag](https://raw.githubusercontent.com/filipecabaco/talkpocket/img/create.png)
+![Create speech article](img/create.png)
 
 1. Send API key to fetch articles
    * Request articles and fetch them from service, returns text ready to be converted
@@ -45,7 +45,7 @@
    * Save the MP3 file into File Storage with the File ID
 
 ### Fetch Speech Article
-![alt tag](https://raw.githubusercontent.com/filipecabaco/talkpocket/img/fetch.png)
+![Fetch speech article](img/fetch.png)
 
 1. Send ID of article
    * Fetch entry by ID and respective File ID
