@@ -34,18 +34,13 @@
      {:file_id filename})
    ))
 
-(defn- dummy-watson
-  [input]
-  (let [out (chan)]
-    (go
-      (println input)
-      (>! out (conj input {:file_id (create-tempory-file)})))
-    [out]))
+(defn- dummy-watson [input] (conj input {:file_id (create-tempory-file)}))
 
 (defn consumer [in]
   (let [out (chan)]
     (go
       (let [input (<! in)]
+        ;(>! out (conj (dummy-watson input) input))))
         (>! out (conj (convert-text-to-voice input) input))))
-    [out]))
+    out))
 

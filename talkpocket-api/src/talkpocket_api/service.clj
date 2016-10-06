@@ -10,7 +10,8 @@
              :as a
              :refer [>! <! >!! <!! go chan buffer close! thread
                      alts! alts!! timeout]]
-            [talkpocket-api.helpers :as helper]))
+            [talkpocket-api.helpers :as helper]
+            [talkpocket-api.entry.entry-dal :as entry-dal]))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -21,8 +22,9 @@
   [{:keys [headers params json-params path-params] :as request}]
   (let [{url :url} json-params
         in (chan)
-        extractorChan (feed/consumer in)
-        watsonChan (watson/consumer extractorChan)
+        extractor-chan (feed/consumer in)
+        watson-chan (watson/consumer extractor-chan)
+        entry-dal-chan (entry-dal/consumer watson-chan)
         uuid (helper/uuid)]
     (>!! in {:url url :id uuid})
     (ring-resp/response uuid)))
