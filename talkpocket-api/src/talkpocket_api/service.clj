@@ -11,7 +11,7 @@
              :refer [>! <! >!! <!! go chan buffer close! thread
                      alts! alts!! timeout]]
             [talkpocket-api.helpers :as helper]
-            [talkpocket-api.entry.entry-dal :as entry-dal]
+            [talkpocket-api.storage.cassandra :as cassandra]
             [cheshire.core :refer :all]
             [talkpocket-api.storage.minio :as minio]))
 
@@ -26,22 +26,22 @@
         in (chan)
         extractor-chan (feed/consumer in)
         watson-chan (watson/consumer extractor-chan)
-        entry-dal-chan (entry-dal/consumer watson-chan)
-        minio-chan (minio/consumer entry-dal-chan)
+        cassandra-chan (cassandra/consumer watson-chan)
+        minio-chan (minio/consumer cassandra-chan)
         uuid (helper/uuid)]
     (>!! in {:url url :id uuid :op "insert"})
     (ring-resp/response uuid)))
 
 (defn- list-talks [request]
   (let [in (chan)
-        entry-chan (entry-dal/consumer in)]
+        entry-chan (cassandra/consumer in)]
     (>!! in {:op "all"})
     (ring-resp/response (generate-string (<!! entry-chan)))))
 
 (defn- get-talk [request]
   (let [talk-id (get-in request [:path-params :id])
         in (chan)
-        entry-chan (entry-dal/consumer in)]
+        entry-chan (cassandra/consumer in)]
     (>!! in {:op "search" :id talk-id})
     (ring-resp/response (generate-string (first (<!! entry-chan))))))
 
