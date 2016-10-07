@@ -18,7 +18,7 @@
 ;; apply to / and its children (/about).
 (def common-interceptors [(body-params/body-params) http/html-body])
 
-(defn convert-url-to-podcast
+(defn- convert-url-to-podcast
   [{:keys [headers params json-params path-params] :as request}]
   (let [{url :url} json-params
         in (chan)
@@ -26,13 +26,24 @@
         watson-chan (watson/consumer extractor-chan)
         entry-dal-chan (entry-dal/consumer watson-chan)
         uuid (helper/uuid)]
-    (>!! in {:url url :id uuid})
+    (>!! in {:url url :id uuid :op "insert"})
     (ring-resp/response uuid)))
+
+(defn- get-all-talks [request]
+  (ring-resp/response "todo"))
+
+(defn- get-talk [request]
+  (let [talk-id (get-in request [:path-params :id])
+        in (chan)
+        entry-chan (entry-dal/consumer in)]
+    (>!! in {:op "search" :id talk-id})
+    (ring-resp/response (<!! entry-chan))))
 
 (defroutes routes
   [[["/talk" {:post convert-url-to-podcast}
-     ^:interceptors [(body-params/body-params)]
-     ]]])
+             {:get  get-all-talks}
+             ^:interceptors [(body-params/body-params)]
+     ["/:id" {:get get-talk}]]]])
 
 ;; Consumed by talkpocket-api.server/create-server
 ;; See http/default-interceptors for additional options you can configure

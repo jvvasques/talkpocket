@@ -31,17 +31,22 @@
   (alia/execute session "USE talkpocket;")
   (alia/execute session @get-entry-by-id-prepared {:values [article-id]}))
 
-
-;; TODO needs to support fetching two. Deconstruct a map and fetch the right operation there
 (defn consumer
   "Consumer that receives a map and persists it to Cassandra"
   [in]
   (let [out (chan)]
     (go
       (let [entry (<! in)
-            {artcile-id :id file-id :file_id  file-url :url} entry]
-        (create-schema)
-        (insert-entry artcile-id file-id file-url)
-        (>! out entry)))
+            {operation :op} entry]
+        (cond
+          (= operation "insert")
+           (let [{artcile-id :id file-id :file_id  file-url :url} entry]
+            (create-schema)
+            (insert-entry artcile-id file-id file-url)
+            (>! out entry))
+           (= operation "search")
+           (let [{article-id :id} entry]
+             (>! out (get-entry article-id)))
+          )))
     out))
 
