@@ -58,7 +58,7 @@ if (env.production === false) {
       'Access-Control-Allow-Origin': 'http://localhost:3001',
       'Access-Control-Allow-Headers': 'X-Requested-With'
     }
-  }).listen(3000, 'localhost', function (err) {
+  }).listen(3000, function (err) {
     if (err) {
       console.log(err);
     }
