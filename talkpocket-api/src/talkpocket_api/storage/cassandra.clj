@@ -1,4 +1,4 @@
-(ns talkpocket-api.entry.entry-dal
+(ns talkpocket-api.storage.cassandra
   (:require [qbits.alia :as alia]
             [clojure.core.async
              :as a
