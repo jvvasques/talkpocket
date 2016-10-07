@@ -11,7 +11,8 @@
              :refer [>! <! >!! <!! go chan buffer close! thread
                      alts! alts!! timeout]]
             [talkpocket-api.helpers :as helper]
-            [talkpocket-api.entry.entry-dal :as entry-dal]))
+            [talkpocket-api.entry.entry-dal :as entry-dal]
+            [cheshire.core :refer :all]))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -30,14 +31,17 @@
     (ring-resp/response uuid)))
 
 (defn- get-all-talks [request]
-  (ring-resp/response "todo"))
+  (let [in (chan)
+        entry-chan (entry-dal/consumer in)]
+    (>!! in {:op "all"})
+    (ring-resp/response (generate-string (<!! entry-chan)))))
 
 (defn- get-talk [request]
   (let [talk-id (get-in request [:path-params :id])
         in (chan)
         entry-chan (entry-dal/consumer in)]
     (>!! in {:op "search" :id talk-id})
-    (ring-resp/response (<!! entry-chan))))
+    (ring-resp/response (generate-string (first (<!! entry-chan))))))
 
 (defroutes routes
   [[["/talk" {:post convert-url-to-podcast}

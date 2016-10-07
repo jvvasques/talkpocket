@@ -23,6 +23,8 @@
                  [diffbot/diffbot "0.1.0"]
                  [com.ibm.watson.developer_cloud/java-sdk "3.4.0"]
                  [environ "1.1.0"]
+                 [cc.qbits/hayt "3.0.1"]
+                 [cheshire "5.6.3"]
                  [org.slf4j/log4j-over-slf4j "1.7.21"]]
   :min-lein-version "2.0.0"
   :resource-paths ["config", "resources"]

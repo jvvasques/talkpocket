@@ -3,7 +3,9 @@
             [clojure.core.async
              :as a
              :refer [>! <! >!! <!! go chan buffer close! thread
-                     alts! alts!! timeout]]))
+                     alts! alts!! timeout]]
+            [qbits.hayt :refer :all]
+            ))
 
 (def cluster (alia/cluster {:contact-points ["127.0.0.1"]}))
 (def session (alia/connect cluster))
@@ -31,6 +33,10 @@
   (alia/execute session "USE talkpocket;")
   (alia/execute session @get-entry-by-id-prepared {:values [article-id]}))
 
+(defn- get-all []
+  (alia/execute session "USE talkpocket;")
+  (alia/execute session (select :articles)))
+
 (defn consumer
   "Consumer that receives a map and persists it to Cassandra"
   [in]
@@ -47,6 +53,8 @@
            (= operation "search")
            (let [{article-id :id} entry]
              (>! out (get-entry article-id)))
+           (= operation "all")
+           (>! out (get-all))
           )))
     out))
 
