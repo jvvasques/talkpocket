@@ -20,7 +20,7 @@
 ;; apply to / and its children (/about).
 (def common-interceptors [(body-params/body-params) http/html-body])
 
-(defn- convert-url-to-podcast
+(defn- convert-url-to-talk
   [{:keys [headers params json-params path-params] :as request}]
   (let [{url :url} json-params
         in (chan)
@@ -32,7 +32,7 @@
     (>!! in {:url url :id uuid :op "insert"})
     (ring-resp/response uuid)))
 
-(defn- get-all-talks [request]
+(defn- list-talks [request]
   (let [in (chan)
         entry-chan (entry-dal/consumer in)]
     (>!! in {:op "all"})
@@ -53,8 +53,8 @@
     (ring-resp/response file-id)))
 
 (defroutes routes
-  [[["/talk" {:post convert-url-to-podcast}
-             {:get  get-all-talks}
+  [[["/talk" {:post convert-url-to-talk}
+             {:get  list-talks}
              ^:interceptors [(body-params/body-params)]
      ["/:id" {:get get-talk}]]
     ["/file/:id" {:get get-audio-file}]]])

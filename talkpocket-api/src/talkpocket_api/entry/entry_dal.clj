@@ -16,7 +16,7 @@
 (def update-entry-state-prepared (delay (alia/prepare session update-entry-state-query)))
 (def get-entry-by-id-prepared (delay (alia/prepare session get-entry-by-id-query)))
 
-(defn- create-schema []
+(defn create-schema []
   (alia/execute session "CREATE KEYSPACE IF NOT EXISTS talkpocket
                          WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3};")
   (alia/execute session "USE talkpocket;")
@@ -56,7 +56,6 @@
         (cond
           (= operation "insert")
            (let [{id :id file-id :file_id file-url :url audio-format :format} entry]
-             (create-schema)
              (insert-entry id file-id file-url (str audio-format) (int 0))
              (>! out entry))
            (= operation "update")

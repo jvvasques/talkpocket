@@ -2,7 +2,8 @@
   (:gen-class) ; for -main method in uberjar
   (:require [io.pedestal.http :as server]
             [io.pedestal.http.route :as route]
-            [talkpocket-api.service :as service]))
+            [talkpocket-api.service :as service]
+            [talkpocket-api.entry.entry-dal :as entry-dal]))
 
 ;; This is an adapted service map, that can be started and stopped
 ;; From the REPL you can call server/start and server/stop on this service
@@ -30,6 +31,8 @@
 (defn -main
   "The entry-point for 'lein run'"
   [& args]
+  (println "\nCreating database schema")
+  (entry-dal/create-schema)
   (println "\nCreating your server...")
   (server/start runnable-service))
 
