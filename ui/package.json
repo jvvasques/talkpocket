@@ -36,13 +36,16 @@
   "dependencies": {
     "babel-polyfill": "6.3.14",
     "babel-runtime": "6.3.19",
+    "classnames": "2.2.5",
     "compression": "1.6.1",
     "cross-env": "1.0.7",
     "ejs": "2.4.1",
     "express": "4.13.4",
     "express-ejs-layouts": "2.0.0",
+    "file-loader": "0.9.0",
     "react": "15.3.2",
     "react-dom": "15.3.2",
+    "url-loader": "0.5.7",
     "webpack": "1.12.12"
   },
   "devDependencies": {
