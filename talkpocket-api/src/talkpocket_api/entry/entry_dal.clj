@@ -9,7 +9,7 @@
 
 (def cluster (alia/cluster {:contact-points ["127.0.0.1"]}))
 (def session (alia/connect cluster))
-(def insert-entry-query "INSERT INTO articles (article_id, file_id, file_url) VALUES (?, ?, ?)")
+(def insert-entry-query "INSERT INTO articles (article_id, file_id, file_url, audio_format) VALUES (?, ?, ?, ?)")
 (def get-entry-by-id-query "SELECT * FROM articles WHERE article_id = ?")
 (def insert-entry-prepared (delay (alia/prepare session insert-entry-query)))
 (def get-entry-by-id-prepared (delay (alia/prepare session get-entry-by-id-query)))
@@ -22,11 +22,12 @@
                                                 article_id varchar,
                                                 file_id varchar,
                                                 file_url varchar,
+                                                audio_format varchar,
                                                 PRIMARY KEY (article_id));"))
 (defn- insert-entry
-  [article-id file-id file_url]
+  [article-id file-id file_url audio-format]
   (alia/execute session "USE talkpocket;")
-  (alia/execute session @insert-entry-prepared {:values [article-id file-id file_url]}))
+  (alia/execute session @insert-entry-prepared {:values [article-id file-id file_url audio-format]}))
 
 (defn- get-entry
   [article-id]
@@ -46,9 +47,9 @@
             {operation :op} entry]
         (cond
           (= operation "insert")
-           (let [{artcile-id :id file-id :file_id  file-url :url} entry]
+           (let [{article-id :id file-id :file_id  file-url :url audio-format :format} entry]
             (create-schema)
-            (insert-entry artcile-id file-id file-url)
+            (insert-entry article-id file-id file-url (str audio-format))
             (>! out entry))
            (= operation "search")
            (let [{article-id :id} entry]
