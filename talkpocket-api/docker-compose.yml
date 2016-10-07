@@ -1,3 +1,10 @@
+common: &BASE
+  build: .
+  env_file: prod.env
+  links:
+    - s3:api.s3
+    - cassandra:api.cassandra
+
 cassandra:
   image: cassandra:2.2
   ports:
@@ -11,12 +18,12 @@ s3:
   env_file: prod.env
 
 api:
-  build: .
+  <<: *BASE
   ports:
     - "8080:8080"
   command: bash -c "lein run"
-  env_file: prod.env
-  links:
-    - s3:api.s3
-    - cassandra:api.cassandra
+
+tests:
+  <<: *BASE
+  command: bash -c "lein test"
 
