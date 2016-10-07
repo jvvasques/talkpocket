@@ -12,7 +12,8 @@
                      alts! alts!! timeout]]
             [talkpocket-api.helpers :as helper]
             [talkpocket-api.entry.entry-dal :as entry-dal]
-            [cheshire.core :refer :all]))
+            [cheshire.core :refer :all]
+            [talkpocket-api.storage.minio :as minio]))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -26,6 +27,7 @@
         extractor-chan (feed/consumer in)
         watson-chan (watson/consumer extractor-chan)
         entry-dal-chan (entry-dal/consumer watson-chan)
+        minio-chan (minio/consumer entry-dal-chan)
         uuid (helper/uuid)]
     (>!! in {:url url :id uuid :op "insert"})
     (ring-resp/response uuid)))
@@ -43,11 +45,19 @@
     (>!! in {:op "search" :id talk-id})
     (ring-resp/response (generate-string (first (<!! entry-chan))))))
 
+(defn- get-audio-file [request]
+  (let [file-id (get-in request [:path-params :id])
+        in (chan)
+        minio-chan (minio/consumer in)]
+    ; TODO
+    (ring-resp/response file-id)))
+
 (defroutes routes
   [[["/talk" {:post convert-url-to-podcast}
              {:get  get-all-talks}
              ^:interceptors [(body-params/body-params)]
-     ["/:id" {:get get-talk}]]]])
+     ["/:id" {:get get-talk}]]
+    ["/file/:id" {:get get-audio-file}]]])
 
 ;; Consumed by talkpocket-api.server/create-server
 ;; See http/default-interceptors for additional options you can configure

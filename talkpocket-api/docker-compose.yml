@@ -1,6 +1,11 @@
-version: "2"
-services:
-  talkforce-db:
-    image: cassandra:2.2
-    ports:
-      - "9042:9042"
+cassandra:
+  image: cassandra:2.2
+  ports:
+    - "9042:9042"
+
+s3:
+  image: minio/minio
+  command: /export
+  ports:
+    - "9000:9000"
+

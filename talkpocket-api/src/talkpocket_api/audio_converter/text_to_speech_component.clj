@@ -19,9 +19,10 @@
     service))
 
 (def defaultVoice "en-US_LisaVoice")
-(def defaultFormat "audio/wav")
+(def defaultFormat :wav)
 
 (defn- create-tempory-file [] (str "/tmp/" (helper/uuid) ".wav"))
+;(defn- create-tempory-file [] (str "/tmp/acba6538-a05f-4b99-aa7b-368e4c5eb3cb.wav"))
 
 (defn- convert-text-to-voice
   ([input] (convert-text-to-voice {:text input} defaultVoice))
@@ -31,10 +32,10 @@
          in (.execute (.synthesize watsonService text voice (. AudioFormat WAV)))
          filename (create-tempory-file)]
      (io/copy in (io/file filename))
-     {:file_id filename})
+     {:file_id filename :format defaultFormat})
    ))
 
-(defn- dummy-watson [input] (conj input {:file_id (create-tempory-file)}))
+(defn- dummy-watson [input] (conj input {:file_id (create-tempory-file) :format defaultFormat}))
 
 (defn consumer [in]
   (let [out (chan)]
