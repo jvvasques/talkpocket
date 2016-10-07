@@ -1,29 +1,36 @@
-common: &BASE
-  build: .
-  env_file: prod.env
-  links:
-    - s3:api.s3
-    - cassandra:api.cassandra
+version: '2'
+services:
+  common: &BASE
+    build: ./talkpocket-api
+    env_file: prod.env
+    links:
+      - s3:api.s3
+      - cassandra:api.cassandra
 
-cassandra:
-  image: cassandra:2.2
-  ports:
-    - "9042:9042"
+  cassandra:
+    image: cassandra:2.2
+    ports:
+      - "9042:9042"
 
-s3:
-  image: minio/minio
-  command: /export
-  ports:
-    - "9000:9000"
-  env_file: prod.env
+  s3:
+    image: minio/minio
+    command: /export
+    ports:
+      - "9000:9000"
+    env_file: prod.env
 
-api:
-  <<: *BASE
-  ports:
-    - "8080:8080"
-  command: bash -c "lein run"
+  api:
+    <<: *BASE
+    ports:
+      - "8080:8080"
+    command: bash -c "lein run"
 
-tests:
-  <<: *BASE
-  command: bash -c "lein test"
+  tests:
+    <<: *BASE
+    command: bash -c "lein test"
 
+  talkpocketui:
+    ports:
+      - "3001:3001"
+      - "3000:3000"
+    build: ./ui        
