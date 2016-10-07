@@ -3,39 +3,34 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.http.body-params :as body-params]
             [ring.util.response :as ring-resp]
-
-            [talkpocket-api.extractor.feed-extractor :as feed]))
-
-(defn about-page
-  [request]
-  (ring-resp/response (format "Clojure %s - served from %s"
-                              (clojure-version)
-                              (route/url-for ::about-page))))
-
-(defn home-page
-  [request]
-  (ring-resp/response "Hello World!"))
+            [io.pedestal.http.route.definition :refer :all]
+            [talkpocket-api.extractor.feed-extractor :as feed]
+            [talkpocket-api.audio-converter.text-to-speech-component :as watson]
+            [clojure.core.async
+             :as a
+             :refer [>! <! >!! <!! go chan buffer close! thread
+                     alts! alts!! timeout]]
+            [talkpocket-api.helpers :as helper]))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
 ;; apply to / and its children (/about).
 (def common-interceptors [(body-params/body-params) http/html-body])
 
-;; Tabular routes
-(def routes #{["/" :get (conj common-interceptors `home-page)]
-              ["/about" :get (conj common-interceptors `about-page)]})
+(defn convert-url-to-podcast
+  [{:keys [headers params json-params path-params] :as request}]
+  (let [{url :url} json-params
+        in (chan)
+        extractorChan (feed/consumer in)
+        watsonChan (watson/consumer extractorChan)
+        uuid (helper/uuid)]
+    (>!! in {:url url :id uuid})
+    (ring-resp/response uuid)))
 
-;; Map-based routes
-;(def routes `{"/" {:interceptors [(body-params/body-params) http/html-body]
-;                   :get home-page
-;                   "/about" {:get about-page}}})
-
-;; Terse/Vector-based routes
-;(def routes
-;  `[[["/" {:get home-page}
-;      ^:interceptors [(body-params/body-params) http/html-body]
-;      ["/about" {:get about-page}]]]])
-
+(defroutes routes
+  [[["/talk" {:post convert-url-to-podcast}
+     ^:interceptors [(body-params/body-params)]
+     ]]])
 
 ;; Consumed by talkpocket-api.server/create-server
 ;; See http/default-interceptors for additional options you can configure

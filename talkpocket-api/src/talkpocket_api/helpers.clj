@@ -1,2 +1,4 @@
-(ns talkpocket-api.service.helpers)
+(ns talkpocket-api.helpers)
+
+(defn uuid [] (str (java.util.UUID/randomUUID)))
 
