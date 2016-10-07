@@ -13,7 +13,8 @@
             [talkpocket-api.helpers :as helper]
             [talkpocket-api.storage.cassandra :as cassandra]
             [cheshire.core :refer :all]
-            [talkpocket-api.storage.minio :as minio]))
+            [talkpocket-api.storage.minio :as minio]
+            [base64-clj.core :as base64]))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -28,9 +29,9 @@
         watson-chan (watson/consumer extractor-chan)
         cassandra-chan (cassandra/consumer watson-chan)
         minio-chan (minio/consumer cassandra-chan)
-        uuid (helper/uuid)]
-    (>!! in {:url url :id uuid :op "insert"})
-    (ring-resp/response uuid)))
+        enconded (base64/encode url "UTF-8")]
+    (>!! in {:url url :id enconded :op "insert"})
+    (ring-resp/response enconded)))
 
 (defn- list-talks [request]
   (let [in (chan)
@@ -49,7 +50,7 @@
   (let [file-id (get-in request [:path-params :id])
         in-cassandra (chan)
         in-minio (chan)
-        cassandra-chan (entry-dal/consumer in-cassandra)
+        cassandra-chan (cassandra/consumer in-cassandra)
         minio-chan (minio/consumer in-minio)]
     (>!! in-cassandra {:op "search" :id file-id})
     (>!! in-minio {:id (get (first (<!! cassandra-chan)) :id) :op "fetch"})

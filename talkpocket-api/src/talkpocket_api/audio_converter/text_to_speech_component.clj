@@ -25,10 +25,10 @@
 ;(defn- create-tempory-file [] (str "/tmp/acba6538-a05f-4b99-aa7b-368e4c5eb3cb.wav"))
 
 (defn- convert-text-to-voice
-  ([input] (convert-text-to-voice {:text input} defaultVoice))
+  ([input] (convert-text-to-voice input defaultVoice))
   ([input voiceType]
    (let [voice (new Voice voiceType nil nil)
-         text {:text input}
+         text (:text input)
          in (.execute (.synthesize watsonService text voice (. AudioFormat WAV)))
          filename (create-tempory-file)]
      (io/copy in (io/file filename))
@@ -44,4 +44,3 @@
         ;(>! out (conj (dummy-watson input) input))))
         (>! out (conj (convert-text-to-voice input) input))))
     out))
-
