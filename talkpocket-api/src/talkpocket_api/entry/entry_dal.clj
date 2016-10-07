@@ -9,9 +9,11 @@
 
 (def cluster (alia/cluster {:contact-points ["127.0.0.1"]}))
 (def session (alia/connect cluster))
-(def insert-entry-query "INSERT INTO articles (article_id, file_id, file_url, audio_format) VALUES (?, ?, ?, ?)")
-(def get-entry-by-id-query "SELECT * FROM articles WHERE article_id = ?")
+(def insert-entry-query "INSERT INTO articles (id, file_id, file_url, audio_format, state) VALUES (?, ?, ?, ?, ?)")
+(def update-entry-state-query "UPDATE articles SET state = ? WHERE id = ?")
+(def get-entry-by-id-query "SELECT * FROM articles WHERE id = ?")
 (def insert-entry-prepared (delay (alia/prepare session insert-entry-query)))
+(def update-entry-state-prepared (delay (alia/prepare session update-entry-state-query)))
 (def get-entry-by-id-prepared (delay (alia/prepare session get-entry-by-id-query)))
 
 (defn- create-schema []
@@ -19,20 +21,26 @@
                          WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3};")
   (alia/execute session "USE talkpocket;")
   (alia/execute session "CREATE TABLE IF NOT EXISTS articles (
-                                                article_id varchar,
+                                                id varchar,
                                                 file_id varchar,
                                                 file_url varchar,
                                                 audio_format varchar,
-                                                PRIMARY KEY (article_id));"))
+                                                state int,
+                                                PRIMARY KEY (id));"))
 (defn- insert-entry
-  [article-id file-id file_url audio-format]
+  [id file-id file_url audio-format state]
   (alia/execute session "USE talkpocket;")
-  (alia/execute session @insert-entry-prepared {:values [article-id file-id file_url audio-format]}))
+  (alia/execute session @insert-entry-prepared {:values [id file-id file_url audio-format state]}))
+
+(defn- update-article-state
+  [id new-state]
+  (alia/execute session "USE talkpocket;")
+  (alia/execute session @update-entry-state-prepared {:values [id new-state]}))
 
 (defn- get-entry
-  [article-id]
+  [id]
   (alia/execute session "USE talkpocket;")
-  (alia/execute session @get-entry-by-id-prepared {:values [article-id]}))
+  (alia/execute session @get-entry-by-id-prepared {:values [id]}))
 
 (defn- get-all []
   (alia/execute session "USE talkpocket;")
@@ -47,13 +55,16 @@
             {operation :op} entry]
         (cond
           (= operation "insert")
-           (let [{article-id :id file-id :file_id  file-url :url audio-format :format} entry]
-            (create-schema)
-            (insert-entry article-id file-id file-url (str audio-format))
-            (>! out entry))
+           (let [{id :id file-id :file_id file-url :url audio-format :format} entry]
+             (create-schema)
+             (insert-entry id file-id file-url (str audio-format) (int 0))
+             (>! out entry))
+           (= operation "update")
+           (let [{id :id} entry]
+             (update-article-state 1 id))
            (= operation "search")
-           (let [{article-id :id} entry]
-             (>! out (get-entry article-id)))
+           (let [{id :id} entry]
+             (>! out (get-entry id)))
            (= operation "all")
            (>! out (get-all))
           )))
