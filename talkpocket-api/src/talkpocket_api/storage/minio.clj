@@ -9,8 +9,8 @@
 (import io.minio.ObjectStat)
 
 (def service-host (System/getenv "MINIO_HOST"))
-(def service-key (System/getenv "MINIO_KEY"))
-(def service-secret (System/getenv "MINIO_SECRET"))
+(def service-key (System/getenv "MINIO_ACCESS_KEY"))
+(def service-secret (System/getenv "MINIO_SECRET_KEY"))
 (def bucket "talkpocket")
 (def client (new MinioClient service-host service-key service-secret))
 

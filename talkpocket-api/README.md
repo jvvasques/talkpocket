@@ -4,6 +4,12 @@ FIXME
 
 ## Getting Started
 
+1. Set the environment variables:
+    ```
+    export MINIO_ACCESS_KEY=Q3AM3UQ867SPQQA43P2F
+    export MINIO_HOST=localhost
+    export MINIO_SECRET_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+    ```
 1. Start the servers: `docker-compose run`
 1. Start the application: `lein run`
 1. Go to [localhost:8080](http://localhost:8080/) to see: `Hello World!`
