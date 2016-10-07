@@ -47,10 +47,13 @@
 
 (defn- get-audio-file [request]
   (let [file-id (get-in request [:path-params :id])
-        in (chan)
-        minio-chan (minio/consumer in)]
-    ; TODO
-    (ring-resp/response file-id)))
+        in-cassandra (chan)
+        in-minio (chan)
+        cassandra-chan (entry-dal/consumer in-cassandra)
+        minio-chan (minio/consumer in-minio)]
+    (>!! in-cassandra {:op "search" :id file-id})
+    (>!! in-minio {:id (get (first (<!! cassandra-chan)) :id) :op "fetch"})
+    (ring-resp/response (<!! minio-chan))))
 
 (defroutes routes
   [[["/talk" {:post convert-url-to-talk}

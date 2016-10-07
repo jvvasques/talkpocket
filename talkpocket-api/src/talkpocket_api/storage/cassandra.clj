@@ -63,7 +63,7 @@
              (update-article-state 1 id))
            (= operation "search")
            (let [{id :id} entry]
-             (>! out (get-entry id)))
+             (>! out (conj (get-entry id))))
            (= operation "all")
            (>! out (get-all))
           )))
