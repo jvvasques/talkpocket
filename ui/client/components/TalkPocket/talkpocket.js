@@ -8,13 +8,13 @@ class TalkPocket extends Component {
 
         this.state = {
             entries: [
-                { articleUrl: 'http://blabla', soundUrl: 'http://sakdjlksajfl', image: 'image.png'},
-                { articleUrl: 'http://blabl2a', soundUrl: 'http://sakdjlksajfl2', image: 'imag2e.png'}
-            ]
+            ],
+            urlInput: 'sdasd'
         };
 
         this.addNewEntry = this.addNewEntry.bind(this)
         this.updateEntriesStatus = this.updateEntriesStatus.bind(this)
+        this.handleChange = this.handleChange.bind(this)
     }
 
     updateEntriesStatus () {
@@ -38,8 +38,14 @@ class TalkPocket extends Component {
         setInterval(this.updateEntriesStatus, 2000);
     }
 
+    handleChange(event) {
+        const newState = Object.assign({}, this.state, {urlInput: event.target.value})
+
+        this.setState(newState)
+    }
+
     addNewEntry () {
-        var entries = this.state.entries.push({ articleUrl: 'http://blabl2a', soundUrl: 'http://sakdjlksajfl2', image: 'imag2e.png'})
+        var entries = this.state.entries.push({ articleUrl: this.state.urlInput})
 
         const newState = Object.assign({}, this.state, entries)
 
@@ -53,14 +59,16 @@ class TalkPocket extends Component {
                     <div className="ui label">
                         http://
                     </div>
-                    <input type="text" placeholder="Enter an URL to pocket..." />
+                    <input id='' type="text"                     
+                        placeholder="Enter an URL to pocket..." 
+                        value={this.state.urlInput}
+                        onChange={this.handleChange} />
                     <button className="ui button" onClick={this.addNewEntry}>Get Audio</button>
                 </div>
-                <br /><br />
-                
+                <br /><br />                
                 <table className="ui celled striped table">
                     <thead>
-                        <tr><th colSpan="2">
+                        <tr><th colSpan="3">
                         List of URLs
                         </th>
                     </tr></thead>
