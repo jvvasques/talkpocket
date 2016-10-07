@@ -29,8 +29,7 @@
         watson-chan (watson/consumer extractor-chan)
         cassandra-chan (cassandra/consumer watson-chan)
         minio-chan (minio/consumer cassandra-chan)
-        uuid (helper/uuid)
-        enconded (base64/encode uuid)]
+        enconded (base64/encode url "UTF-8")]
     (>!! in {:url url :id enconded :op "insert"})
     (ring-resp/response enconded)))
 
