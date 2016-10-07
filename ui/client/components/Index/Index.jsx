@@ -5,8 +5,9 @@ class IndexComponent extends Component {
   render() {
     return (
       <section>
-        <h2>Talk Pocket</h2>
-        <TalkPocket />
+          <h1 className="ui header">TalkPocket</h1>
+          <br /><br />
+          <TalkPocket />
       </section>
     );
   }
