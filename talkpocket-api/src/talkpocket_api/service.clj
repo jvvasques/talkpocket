@@ -55,7 +55,8 @@
         minio-chan (minio/consumer in-minio)]
     (>!! in-cassandra {:op "search" :id file-id})
     (>!! in-minio {:id (get (first (<!! cassandra-chan)) :id) :op "fetch"})
-    (ring-resp/response (<!! minio-chan))))
+    ; TODO Support other formats and remove hardcoded type
+    (ring-resp/content-type (ring-resp/response (<!! minio-chan)) "audio/wav")))
 
 (defroutes routes
   [[["/talk" {:post convert-url-to-talk}
