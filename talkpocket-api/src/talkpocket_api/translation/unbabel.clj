@@ -36,19 +36,24 @@
         translation
         (recur translation-uid)))))
 
+(defn- consume-translation-request
+  [entry out]
+  (let [{operation :op} entry]
+    (cond
+      (= operation "request-translation")
+      (let [{text :text target-lang :lang}
+            translation-uid (request-translation text target-lang)]
+        (>! out (retry-translation translation-uid))))))
+
 (defn consumer
   "Consumer that provides translation features"
   [in]
   (let [out (chan)]
     (go
       (let [entry (<! in)
-            {operation :op} entry]
-        (cond
-          (= operation "request-translation")
-          (let [{text :text target-lang :target-lang}]
-            (>! out (request-translation text target-lang)))
-          (= operation "get-translation")
-          (let [{translation-uid :translation-uid}]
-            (>! out (retry-translation translation-uid)))
-          ))
-      out)))
+            {lang :lang} entry]
+        (if (nil? lang)
+          (>! out entry)
+          (consume-translation-request entry out))
+        out))))
+

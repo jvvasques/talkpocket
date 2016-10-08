@@ -24,14 +24,15 @@
 
 (defn- convert-url-to-talk
   [{:keys [headers params json-params path-params] :as request}]
-  (let [{url :url} json-params
+  (let [{url :url lang :lang} json-params
         in (chan)
         extractor-chan (feed/consumer in)
         watson-chan (watson/consumer extractor-chan)
         cassandra-chan (cassandra/consumer watson-chan)
         minio-chan (minio/consumer cassandra-chan)
+        uuid (helper/uuid)
         enconded (base64/encode url "UTF-8")]
-    (>!! in {:url url :id enconded :op "insert"})
+    (>!! in {:url url :id enconded :op "insert" :lang lang})
     (ring-resp/response enconded)))
 
 (defn- list-talks [request]
