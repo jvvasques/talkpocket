@@ -14,7 +14,8 @@
             [talkpocket-api.storage.cassandra :as cassandra]
             [cheshire.core :refer :all]
             [talkpocket-api.storage.minio :as minio]
-            [base64-clj.core :as base64]))
+            [base64-clj.core :as base64]
+            [ring.middleware.cors :as cors]))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -23,15 +24,15 @@
 
 (defn- convert-url-to-talk
   [{:keys [headers params json-params path-params] :as request}]
-  (let [{url :url} json-params
+  (let [{url :url lang :lang} json-params
         in (chan)
         extractor-chan (feed/consumer in)
         watson-chan (watson/consumer extractor-chan)
         cassandra-chan (cassandra/consumer watson-chan)
         minio-chan (minio/consumer cassandra-chan)
         uuid (helper/uuid)
-        enconded (base64/encode uuid)]
-    (>!! in {:url url :id enconded :op "insert"})
+        enconded (base64/encode url "UTF-8")]
+    (>!! in {:url url :id enconded :op "insert" :lang lang})
     (ring-resp/response enconded)))
 
 (defn- list-talks [request]
@@ -81,6 +82,9 @@
               ;;
               ;; "http://localhost:8080"
               ;;
+
+              ::http/allowed-origins ["http://localhost:3001"]
+
               ;;::http/allowed-origins ["scheme://host:port"]
 
               ;; Root for resource interceptor that is available by default.

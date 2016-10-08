@@ -9,6 +9,8 @@ FIXME
     export MINIO_ACCESS_KEY=Q3AM3UQ867SPQQA43P2F
     export MINIO_HOST=localhost
     export MINIO_SECRET_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+    export UNBABEL_USERNAME=<Your username>
+    export UNBABEL_API_KEY=<Your API Key>
     ```
 1. Start the servers: `docker-compose run`
 1. Start the application: `lein run`

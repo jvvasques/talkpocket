@@ -1,8 +1,13 @@
-FROM java:8-alpine
+FROM lynxtp/lein
 MAINTAINER Your Name <you@example.com>
 
-ADD target/talkpocket-api-0.0.1-SNAPSHOT-standalone.jar /talkpocket-api/app.jar
+WORKDIR /app/talkpocket-api
+
+ADD project.clj .
+RUN lein deps
+
+ADD . .
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "/talkpocket-api/app.jar"]
+CMD ["./lein", "run"]
