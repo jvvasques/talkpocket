@@ -14,7 +14,8 @@
             [talkpocket-api.storage.cassandra :as cassandra]
             [cheshire.core :refer :all]
             [talkpocket-api.storage.minio :as minio]
-            [base64-clj.core :as base64]))
+            [base64-clj.core :as base64]
+            [ring.middleware.cors :as cors]))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -29,8 +30,7 @@
         watson-chan (watson/consumer extractor-chan)
         cassandra-chan (cassandra/consumer watson-chan)
         minio-chan (minio/consumer cassandra-chan)
-        uuid (helper/uuid)
-        enconded (base64/encode uuid)]
+        enconded (base64/encode url "UTF-8")]
     (>!! in {:url url :id enconded :op "insert"})
     (ring-resp/response enconded)))
 
@@ -81,6 +81,9 @@
               ;;
               ;; "http://localhost:8080"
               ;;
+
+              ::http/allowed-origins ["http://localhost:3001"]
+
               ;;::http/allowed-origins ["scheme://host:port"]
 
               ;; Root for resource interceptor that is available by default.
