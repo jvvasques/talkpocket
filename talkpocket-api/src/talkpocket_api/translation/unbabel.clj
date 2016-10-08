@@ -1,6 +1,10 @@
 (ns talkpocket-api.translation.unbabel
   (:require [clj-http.client :as client]
-            [cheshire.core :refer :all]))
+            [cheshire.core :refer :all]
+            [clojure.core.async
+             :as a
+             :refer [>! <! >!! <!! go chan buffer close! thread
+                     alts! alts!! timeout]]))
 
 (def url "https://sandbox.unbabel.com/tapi/v2/translation/")
 (def username (System/getenv "UNBABEL_USERNAME"))
@@ -40,10 +44,11 @@
   [entry out]
   (let [{operation :op} entry]
     (cond
-      (= operation "request-translation")
-      (let [{text :text target-lang :lang}
-            translation-uid (request-translation text target-lang)]
-        (>! out (retry-translation translation-uid))))))
+      (= operation "insert")
+      (let [{text :text target-lang :lang} entry
+            translation-uid (request-translation text target-lang)
+            translated-text (retry-translation translation-uid)]
+        (>!! out (conj entry {:text translated-text}))))))
 
 (defn consumer
   "Consumer that provides translation features"
@@ -53,7 +58,9 @@
       (let [entry (<! in)
             {lang :lang} entry]
         (if (nil? lang)
-          (>! out entry)
-          (consume-translation-request entry out))
-        out))))
+          (do
+            (println "no translation...")
+            (>! out entry))
+          (consume-translation-request entry out))))
+    out))
 
