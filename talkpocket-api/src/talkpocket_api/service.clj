@@ -15,7 +15,8 @@
             [cheshire.core :refer :all]
             [talkpocket-api.storage.minio :as minio]
             [base64-clj.core :as base64]
-            [ring.middleware.cors :as cors]))
+            [ring.middleware.cors :as cors]
+            [talkpocket-api.translation.unbabel :as unbabel]))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -27,6 +28,7 @@
   (let [{url :url lang :lang} json-params
         in (chan)
         extractor-chan (feed/consumer in)
+        ;unbabel-chan (unbabel/consumer extractor-chan)
         watson-chan (watson/consumer extractor-chan)
         cassandra-chan (cassandra/consumer watson-chan)
         minio-chan (minio/consumer cassandra-chan)
@@ -83,7 +85,7 @@
               ;; "http://localhost:8080"
               ;;
 
-              ::http/allowed-origins ["http://localhost:3001"]
+              ::http/allowed-origins ["http://localhost:3001" "*"]
 
               ;;::http/allowed-origins ["scheme://host:port"]
 

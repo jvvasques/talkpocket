@@ -14,7 +14,7 @@
 (def bucket "talkpocket")
 (def client (new MinioClient service-host service-key service-secret))
 
-(defn- create-bucket []
+(defn create-bucket []
   (if-not (.bucketExists client bucket)
     (.makeBucket client bucket)))
 
@@ -38,7 +38,6 @@
         (cond
           (= operation "insert")
           (let [{id :id file-id :file_id} request]
-            (create-bucket)
             (put id file-id)
             (>! out (conj request {:op "update"})))
            (= operation "fetch")
@@ -46,4 +45,3 @@
              (>! out (get id)))
           )))
     out))
-

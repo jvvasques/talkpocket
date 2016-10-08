@@ -41,6 +41,6 @@
   (let [out (chan)]
     (go
       (let [input (<! in)]
-        ;(>! out (conj (dummy-watson input) input))))
+                                        ;(>! out (conj (dummy-watson input) input))))
         (>! out (conj (convert-text-to-voice input) input))))
     out))
