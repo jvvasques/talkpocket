@@ -5,7 +5,7 @@ Requests the server to convert an article to an audio talk
 
 * **Endpoint:** /talk
 * **Method:** POST
-* Body: ```{url: "http://...."} ```
+* Body: ```{"url": "http://...."} ```
 
 #### List all talks
 Returns the list of talks
