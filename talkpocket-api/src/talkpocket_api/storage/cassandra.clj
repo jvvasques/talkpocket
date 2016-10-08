@@ -35,7 +35,7 @@
 (defn- update-article-state
   [id new-state]
   (alia/execute session "USE talkpocket;")
-  (alia/execute session @update-entry-state-prepared {:values [id new-state]}))
+  (alia/execute session @update-entry-state-prepared {:values [id (int new-stat)]}))
 
 (defn- get-entry
   [id]
@@ -68,4 +68,3 @@
            (>! out (get-all))
           )))
     out))
-
