@@ -36,7 +36,7 @@
   [id new-state]
   (alia/execute session "USE talkpocket;")
   (println new-state)
-  (alia/execute session @update-entry-state-prepared {:values [id (int new-stat)]}))
+  (alia/execute session @update-entry-state-prepared {:values [id (int new-state)]}))
 
 (defn- get-entry
   [id]
