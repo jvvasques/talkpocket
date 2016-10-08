@@ -4,7 +4,7 @@ import classNames from 'classnames'
 const EntryRow = ({articleUrl, soundUrl, state = 0}) => {
   
   const soundUrlText = state === 0 
-    ? 'Translating text...'
+    ? 'Processing text...'
     : soundUrl
 
   const stateIcon = state === 0 
@@ -34,8 +34,7 @@ const EntryRow = ({articleUrl, soundUrl, state = 0}) => {
 
 EntryRow.propTypes = {
     articleUrl: PropTypes.string.isRequired,
-    soundUrl: PropTypes.string,
-    image: PropTypes.string
+    soundUrl: PropTypes.string
 }
 
 export default EntryRow
