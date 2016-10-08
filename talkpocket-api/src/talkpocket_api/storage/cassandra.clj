@@ -35,8 +35,7 @@
 (defn- update-article-state
   [id new-state]
   (alia/execute session "USE talkpocket;")
-  (println new-state)
-  (alia/execute session @update-entry-state-prepared {:values [id (int new-state)]}))
+  (alia/execute session @update-entry-state-prepared {:values [(int new-state) id]}))
 
 (defn- get-entry
   [id]
@@ -61,7 +60,7 @@
              (>! out entry))
            (= operation "update")
            (let [{id :id} entry]
-             (update-article-state 1 id))
+             (update-article-state id 1))
            (= operation "search")
            (let [{id :id} entry]
              (>! out (conj (get-entry id))))

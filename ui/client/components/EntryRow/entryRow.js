@@ -1,11 +1,11 @@
 import React, { PropTypes } from 'react'
 import classNames from 'classnames'
 
-const EntryRow = ({articleUrl, soundUrl, state = 0}) => {
+const EntryRow = ({id, articleUrl, soundUrl, state = 0}) => {
   
   const soundUrlText = state === 0 
     ? 'Processing text...'
-    : soundUrl
+    : <audio controls><source src={'http://localhost:8080/file/' + id} type="audio/wav"/></audio>
 
   const stateIcon = state === 0 
     ? <div className="ui active inline loader"></div>
