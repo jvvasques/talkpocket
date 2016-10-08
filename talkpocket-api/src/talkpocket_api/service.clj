@@ -30,6 +30,7 @@
         watson-chan (watson/consumer extractor-chan)
         cassandra-chan (cassandra/consumer watson-chan)
         minio-chan (minio/consumer cassandra-chan)
+        change-state-chan (cassandra/consumer minio-chan)
         uuid (helper/uuid)
         enconded (base64/encode url "UTF-8")]
     (>!! in {:url url :id enconded :op "insert" :lang lang})
@@ -56,7 +57,6 @@
         minio-chan (minio/consumer in-minio)]
     (>!! in-cassandra {:op "search" :id file-id})
     (>!! in-minio {:id (get (first (<!! cassandra-chan)) :id) :op "fetch"})
-    ; TODO Support other formats and remove hardcoded type
     (ring-resp/content-type (ring-resp/response (<!! minio-chan)) "audio/wav")))
 
 (defroutes routes

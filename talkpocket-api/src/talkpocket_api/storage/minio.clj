@@ -40,7 +40,7 @@
           (let [{id :id file-id :file_id} request]
             (create-bucket)
             (put id file-id)
-            (>! out request))
+            (>! out (conj request {:op "update"})))
            (= operation "fetch")
            (let [{id :id} request]
              (>! out (get id)))
