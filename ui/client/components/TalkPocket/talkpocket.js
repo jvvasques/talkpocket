@@ -50,7 +50,7 @@ class TalkPocket extends Component {
 
     componentDidMount () {
         this.updateEntriesStatus();
-        setInterval(this.updateEntriesStatus, 5000);
+        setInterval(this.updateEntriesStatus, 1000);
     }
 
     handleChange(event) {
