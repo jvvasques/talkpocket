@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import EntryRow from '../EntryRow/entryRow'
+import $ from 'jquery'
 
 class TalkPocket extends Component {
   
@@ -7,35 +8,45 @@ class TalkPocket extends Component {
         super(props);
 
         this.state = {
-            entries: [
-            ],
+            entries: [],
             urlInput: 'sdasd'
         };
-
         this.addNewEntry = this.addNewEntry.bind(this)
         this.updateEntriesStatus = this.updateEntriesStatus.bind(this)
         this.handleChange = this.handleChange.bind(this)
     }
 
-    updateEntriesStatus () {
-        $.ajax({
-            url: this.props.url,
-            dataType: 'json',
-            cache: false,
-            success: function(data) {
-                this.setState({data: data});
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
+    updateEntriesStatus () {        
+        let self = this;                
+
+        $.get( "http://localhost:8080/talk")
+        .done(function( data ) {                            
+            let responseJSON = JSON.parse(data)
+            let entries = []
+
+            responseJSON.map((entry) => {
+                entries.push({
+                    id: entry.id,
+                    articleUrl: entry.file_url,
+                    soundUrl: entry.file_id,
+                    state: entry.state
+                })
+            })
+
+            console.log(entries)                
+            const newState = Object.assign({}, self.state, {entries})
+
+            self.setState(newState)
         });
+
+        console.log(this.state)
 
         console.log('Updating entries')
     }
 
     componentDidMount () {
         this.updateEntriesStatus();
-        setInterval(this.updateEntriesStatus, 2000);
+        setInterval(this.updateEntriesStatus, 5000);
     }
 
     handleChange(event) {
@@ -44,12 +55,25 @@ class TalkPocket extends Component {
         this.setState(newState)
     }
 
-    addNewEntry () {
-        var entries = this.state.entries.push({ articleUrl: this.state.urlInput})
+    addNewEntry () {        
+        $.ajax({
+            url: "http://localhost:8080/talk",
+            type: "POST",
+            data: JSON.stringify({"url": this.state.urlInput}),
+            contentType: "application/json",            
+            success: function(){
+                console.log('sucess')
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.log('error', status, err)
+            }.bind(this)
+        })
 
-        const newState = Object.assign({}, this.state, entries)
+        // var entries = this.state.entries.push({ articleUrl: this.state.urlInput})
 
-        this.setState(newState)
+        // const newState = Object.assign({}, this.state, entries)
+
+        // this.setState(newState)
     }
 
     render() {
