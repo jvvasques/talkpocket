@@ -8,7 +8,7 @@
 (import io.minio.errors.MinioException)
 (import io.minio.ObjectStat)
 
-(def service-host (System/getenv "MINIO_HOST"))
+(def service-host "http://api.s3:9000")
 (def service-key (System/getenv "MINIO_ACCESS_KEY"))
 (def service-secret (System/getenv "MINIO_SECRET_KEY"))
 (def bucket "talkpocket")

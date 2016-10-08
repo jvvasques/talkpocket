@@ -7,7 +7,7 @@
             [qbits.hayt :refer :all]
             ))
 
-(def cluster (alia/cluster {:contact-points ["127.0.0.1"]}))
+(def cluster (alia/cluster {:contact-points ["api.cassandra"]}))
 (def session (alia/connect cluster))
 (def insert-entry-query "INSERT INTO articles (id, file_id, file_url, audio_format, state) VALUES (?, ?, ?, ?, ?)")
 (def update-entry-state-query "UPDATE articles SET state = ? WHERE id = ?")

@@ -1,6 +1,11 @@
 
 # Created by https://www.gitignore.io/api/clojure,leiningen,emacs
 
+### Unnecessary proj files
+*.env
+*.bak
+*.log
+
 ### Clojure ###
 pom.xml
 pom.xml.asc
