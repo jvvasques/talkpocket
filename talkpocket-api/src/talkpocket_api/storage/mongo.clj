@@ -8,22 +8,27 @@
                      alts! alts!! timeout]])
   (:import org.bson.types.ObjectId))
 
-(def session (delay (core/connect {:host "localhost"})))
+(def session (delay (core/connect {:host "api.mongo"})))
 (def db (delay (core/get-db @session "talkpocket")))
 (def collection "entry")
 
-(defn save [& [content]]
-    (coll/save-and-return @db collection content))
+(defn- set-id [input]
+  (let [{obj :_id} input
+        id (str obj)]
+    (conj input {:_id id})))
 
 (defn- keywordize [input]
-  (from-db-object input true))
+  (set-id (from-db-object input true)))
+
+(defn save [& [content]]
+  (set-id (coll/save-and-return @db collection content)))
 
 (defn find
   ([] (map keywordize (coll/find-maps @db collection)))
-  ([id] (keywordize (coll/find-map-by-id @db collection (ObjectId. id)))))
+  ([id] (set-id (coll/find-map-by-id @db collection (ObjectId. id)))))
 
 (defn consumer
-  "Consumer that receives a map and persists it to Cassandra"
+  "Consumer that receives a map and persists it to Mongo"
   [in]
   (let [out (chan)]
     (go
@@ -35,8 +40,8 @@
           (= operation "update")
           (>! out (save entry))
           (= operation "search")
-          (let [{id :id} entry]
-            (>! out (conj (find id))))
+          (let [{id :_id} entry]
+            (>! out (find id)))
           (= operation "all")
           (>! out (find))
           )))

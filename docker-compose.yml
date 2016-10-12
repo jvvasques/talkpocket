@@ -3,12 +3,12 @@ common: &BASE
   env_file: prod.env
   links:
     - s3:api.s3
-    - cassandra:api.cassandra
+    - mongo:api.mongo
 
-cassandra:
-  image: cassandra:2.2
+mongo:
+  image: mongo
   ports:
-    - "9042:9042"
+    - "27017:27017"
 
 s3:
   image: minio/minio

@@ -19,11 +19,11 @@
                               :content-type :json
                               :body         request-body})
         body (:body content)]
-    (get (parse-string body true) :uid)))
+    (get (parse-string body true) :u_id)))
 
 (defn- get-translation
-  [translation-uid]
-  (let [translation-url (str url translation-uid)
+  [translation-u_id]
+  (let [translation-url (str url translation-u_id)
         content (client/get translation-url {:headers headers})
         body (:body content)
         translated (get (parse-string body true) :translatedText)]
@@ -32,13 +32,13 @@
       nil)))
 
 (defn- retry-translation
-  [translation-uid]
-  (loop [uid translation-uid]
-    (let [translation (get-translation uid)]
+  [translation-u_id]
+  (loop [u_id translation-u_id]
+    (let [translation (get-translation u_id)]
       (Thread/sleep 1000)
       (if-not (nil? translation)
         translation
-        (recur translation-uid)))))
+        (recur translation-u_id)))))
 
 (defn- consume-translation-request
   [entry out]
@@ -46,12 +46,12 @@
     (cond
       (= operation "insert")
       (let [{text :text target-lang :lang} entry
-            translation-uid (request-translation text target-lang)
-            translated-text (retry-translation translation-uid)]
+            translation-u_id (request-translation text target-lang)
+            translated-text (retry-translation translation-u_id)]
         (>!! out (conj entry {:text translated-text}))))))
 
 (defn consumer
-  "Consumer that provides translation features"
+  "Consumer that prov_ides translation features"
   [in]
   (let [out (chan)]
     (go
@@ -63,4 +63,3 @@
             (>! out entry))
           (consume-translation-request entry out))))
     out))
-

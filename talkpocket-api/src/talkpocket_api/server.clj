@@ -3,7 +3,7 @@
   (:require [io.pedestal.http :as server]
             [io.pedestal.http.route :as route]
             [talkpocket-api.service :as service]
-            [talkpocket-api.storage.cassandra :as cassandra]
+            [talkpocket-api.storage.mongo :as storage]
             [talkpocket-api.storage.minio :as s3]))
 
 ;; This is an adapted service map, that can be started and stopped
@@ -32,8 +32,6 @@
 (defn -main
   "The entry-point for 'lein run'"
   [& args]
-  (println "\nCreating database schema")
-  (cassandra/create-schema)
   (println "\nCreating bucket")
   (s3/create-bucket)
   (println "\nCreating your server...")
