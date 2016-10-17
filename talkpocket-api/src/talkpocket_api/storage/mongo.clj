@@ -21,11 +21,12 @@
   (set-id (from-db-object input true)))
 
 (defn save [& [content]]
-  (set-id (coll/save-and-return @db collection content)))
+  (let [to-save (set-id content)]
+    (coll/save-and-return @db collection to-save)))
 
 (defn find
   ([] (map keywordize (coll/find-maps @db collection)))
-  ([id] (set-id (coll/find-map-by-id @db collection (ObjectId. id)))))
+  ([id] (set-id (coll/find-map-by-id @db collection id))))
 
 (defn consumer
   "Consumer that receives a map and persists it to Mongo"

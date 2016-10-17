@@ -40,10 +40,8 @@
           (let [{id :_id file-id :file_id} request]
             (put id file-id)
             (>! out (conj request {:op "update"})))
-           (= operation "fetch")
-           (let [{id :_id} request]
-             (println id)
-             (println (get id))
-             (>! out (get id)))
+          (= operation "fetch")
+          (let [{id :_id} request]
+            (>! out (get id)))
           )))
     out))

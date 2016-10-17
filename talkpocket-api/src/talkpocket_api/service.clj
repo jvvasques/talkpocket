@@ -26,13 +26,14 @@
 (defn- convert-url-to-talk
   [{:keys [headers params json-params path-params] :as request}]
   (let [{url :url lang :lang} json-params
-        {id :_id} (storage/save)
+        id (base64/encode url "UTF-8")
         in (chan)
         extractor-chan (feed/consumer in)
         watson-chan (watson/consumer extractor-chan)
         storage-chan (storage/consumer watson-chan)
         minio-chan (minio/consumer storage-chan)
         change-state-chan (storage/consumer minio-chan)]
+    (storage/save {:_id id})
     (>!! in {:url url :_id id :op "insert" :lang lang})
     (ring-resp/response id)))
 
