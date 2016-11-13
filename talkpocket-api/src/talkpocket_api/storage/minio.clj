@@ -26,7 +26,7 @@
     (let []
       (.statObject client bucket name)
       (.getObject client bucket name))
-    (catch MinioException e (println e))))
+    (catch Exception e (println e))))
 
 (defn consumer
   "Consumer that receives requests for storing or fetching files"
@@ -37,11 +37,11 @@
             {operation :op} request]
         (cond
           (= operation "insert")
-          (let [{id :id file-id :file_id} request]
+          (let [{id :_id file-id :file_id} request]
             (put id file-id)
             (>! out (conj request {:op "update"})))
-           (= operation "fetch")
-           (let [{id :id} request]
-             (>! out (get id)))
+          (= operation "fetch")
+          (let [{id :_id} request]
+            (>! out (get id)))
           )))
     out))

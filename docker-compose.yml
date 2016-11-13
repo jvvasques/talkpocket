@@ -3,16 +3,16 @@ common: &BASE
   env_file: prod.env
   links:
     - s3:api.s3
-    - cassandra:api.cassandra
+    - mongo:api.mongo
 
-cassandra:
-  image: cassandra:2.2
+mongo:
+  image: mongo:3.2.9
   ports:
-    - "9042:9042"
+    - "27017:27017"
 
 s3:
-  image: minio/minio
-  command: /export
+  image: minio/minio:RELEASE.2016-10-07T01-16-39Z
+  command: server
   ports:
   - "9000:9000"
   env_file: prod.env
@@ -33,5 +33,3 @@ talkpocketui:
     - "3001:3001"
     - "3000:3000"
   build: ./ui
-
-  

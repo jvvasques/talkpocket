@@ -11,7 +11,7 @@
              :refer [>! <! >!! <!! go chan buffer close! thread
                      alts! alts!! timeout]]
             [talkpocket-api.helpers :as helper]
-            [talkpocket-api.storage.cassandra :as cassandra]
+            [talkpocket-api.storage.mongo :as storage]
             [cheshire.core :refer :all]
             [talkpocket-api.storage.minio :as minio]
             [base64-clj.core :as base64]
@@ -26,39 +26,38 @@
 (defn- convert-url-to-talk
   [{:keys [headers params json-params path-params] :as request}]
   (let [{url :url lang :lang} json-params
+        id (base64/encode url "UTF-8")
         in (chan)
         extractor-chan (feed/consumer in)
-        ;unbabel-chan (unbabel/consumer extractor-chan)
         watson-chan (watson/consumer extractor-chan)
-        cassandra-chan (cassandra/consumer watson-chan)
-        minio-chan (minio/consumer cassandra-chan)
-        change-state-chan (cassandra/consumer minio-chan)
-        uuid (helper/uuid)
-        enconded (base64/encode url "UTF-8")]
-    (>!! in {:url url :id enconded :op "insert" :lang lang})
-    (ring-resp/response enconded)))
+        storage-chan (storage/consumer watson-chan)
+        minio-chan (minio/consumer storage-chan)
+        change-state-chan (storage/consumer minio-chan)]
+    (storage/save {:_id id})
+    (>!! in {:url url :_id id :op "insert" :lang lang})
+    (ring-resp/response id)))
 
 (defn- list-talks [request]
   (let [in (chan)
-        entry-chan (cassandra/consumer in)]
+        entry-chan (storage/consumer in)]
     (>!! in {:op "all"})
     (ring-resp/response (generate-string (<!! entry-chan)))))
 
 (defn- get-talk [request]
   (let [talk-id (get-in request [:path-params :id])
         in (chan)
-        entry-chan (cassandra/consumer in)]
-    (>!! in {:op "search" :id talk-id})
-    (ring-resp/response (generate-string (first (<!! entry-chan))))))
+        entry-chan (storage/consumer in)]
+    (>!! in {:op "search" :_id talk-id})
+    (ring-resp/response (generate-string (<!! entry-chan)))))
 
 (defn- get-audio-file [request]
   (let [file-id (get-in request [:path-params :id])
-        in-cassandra (chan)
+        in-storage (chan)
         in-minio (chan)
-        cassandra-chan (cassandra/consumer in-cassandra)
+        storage-chan (storage/consumer in-storage)
         minio-chan (minio/consumer in-minio)]
-    (>!! in-cassandra {:op "search" :id file-id})
-    (>!! in-minio {:id (get (first (<!! cassandra-chan)) :id) :op "fetch"})
+    (>!! in-storage {:op "search" :_id file-id})
+    (>!! in-minio {:_id (get (<!! storage-chan) :_id) :op "fetch"})
     (ring-resp/content-type (ring-resp/response (<!! minio-chan)) "audio/wav")))
 
 (defroutes routes
@@ -68,38 +67,11 @@
      ["/:id" {:get get-talk}]]
     ["/file/:id" {:get get-audio-file}]]])
 
-;; Consumed by talkpocket-api.server/create-server
-;; See http/default-interceptors for additional options you can configure
 (def service {:env :prod
-              ;; You can bring your own non-default interceptors. Make
-              ;; sure you include routing and set it up right for
-              ;; dev-mode. If you do, many other keys for configuring
-              ;; default interceptors will be ignored.
-              ;; ::http/interceptors []
               ::http/routes routes
-
-              ;; Uncomment next line to enable CORS support, add
-              ;; string(s) specifying scheme, host and port for
-              ;; allowed source(s):
-              ;;
-              ;; "http://localhost:8080"
-              ;;
-
               ::http/allowed-origins ["http://localhost:3001" "*"]
-
-              ;;::http/allowed-origins ["scheme://host:port"]
-
-              ;; Root for resource interceptor that is available by default.
-              ::http/resource-path "/public"
-
-              ;; Either :jetty, :immutant or :tomcat (see comments in project.clj)
               ::http/type :jetty
-              ;;::http/host "localhost"
               ::http/port 8080
-              ;; Options to pass to the container (Jetty)
               ::http/container-options {:h2c? true
                                         :h2? false
-                                        ;:keystore "test/hp/keystore.jks"
-                                        ;:key-password "password"
-                                        ;:ssl-port 8443
                                         :ssl? false}})

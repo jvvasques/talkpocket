@@ -11,7 +11,7 @@
 (defn- extract
   "Extract article from URL"
   [input]
-  (let [{url :url id :id} input
+  (let [{url :url id :_id} input
         content (article token url)
         text (:text content)
         url (:url content)]
@@ -25,4 +25,3 @@
       (let [url (<! in)]
         (>! out (conj (extract url) url))))
     out))
-
